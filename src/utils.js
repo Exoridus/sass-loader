@@ -687,16 +687,17 @@ let nodeSassJobQueue = null;
  * @returns {Function}
  */
 function getCompileFn(implementation, options) {
-  const isNewSass =
-    implementation.info.includes("dart-sass") ||
-    implementation.info.includes("sass-embedded");
+  const isEmbeddedSass = implementation.info.includes("sass-embedded");
+  const isNewSass = implementation.info.includes("dart-sass") || isEmbeddedSass;
 
   if (isNewSass) {
     if (options.api === "modern") {
       return (sassOptions) => {
         const { data, ...rest } = sassOptions;
 
-        return implementation.compileStringAsync(data, rest);
+        return isEmbeddedSass
+          ? implementation.compileString(data, rest)
+          : implementation.compileStringAsync(data, rest);
       };
     }
 
